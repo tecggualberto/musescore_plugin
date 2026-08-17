@@ -7,7 +7,7 @@ var NOTES_FLATS  = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A'
 var NOTES_ROMAN_SHARPS = ['I', 'I#', 'II', 'II#', 'III', 'IV', 'IV#', 'V', 'V#', 'VI', 'VI#', 'VII'];
 var NOTES_ROMAN_FLATS  = ['i', 'i♭', 'ii', 'ii♭', 'iii', 'iv', 'v♭', 'v', 'vi♭', 'vi', 'vii♭', 'vii'];
 
-var FONT_SIZE_MINI = 0.85;
+
 
 // Mapeamento TPC (Tonal Pitch Class) de -1 a 33
 var TPC_MAP = [
@@ -19,36 +19,122 @@ var TPC_MAP = [
 ];
 
 // Mapas estáticos de acordes reserva
+// ============================================================================
+// MAPA ESTÁTICO DE CIFRAS ROMANAS (COM SUS2 E SUS4)
+// ============================================================================
 var CHORDS_ROMAN = {
-  "BDF": "VII°", "DFB": "VII°", "FBD": "VII°",
+  // Tríades Maiores
+  "CEG": "I", "EGC": "I", "GCE": "I",
+  "FAC": "IV", "ACF": "IV", "CFA": "IV",
+  "GBD": "V", "BDG": "V", "DGB": "V",
   "D#F##A#": "II#", "F##A#D#": "II#", "A#D#F##": "II#",
-  "BE♭♭F": "vii°", "E♭♭FB": "vii°", "FBE♭♭": "vii°"
+
+  // Tríades Menores
+  "DFA": "ii", "FAD": "ii", "ADF": "ii",
+  "EGB": "iii", "GBE": "iii", "BEG": "iii",
+  "ACE": "vi", "CEA": "vi", "EAC": "vi",
+
+  // Acordes Suspensos (sus2 / sus4)
+  "CDG": "Isus2", "DGC": "Isus2", "GCD": "Isus2",
+  "GAD": "Vsus2", "ADG": "Vsus2", "DGA": "Vsus2",
+  "CFG": "Isus4", "FGC": "Isus4", "GCF": "Isus4",
+  "GCD": "Vsus4", "DGC": "Vsus4", "CDG": "Vsus4",
+
+  // Tríades Diminutas
+  "BDF": "viidim", "DFB": "viidim", "FBD": "viidim",
+  "BE♭♭F": "viidim", "E♭♭FB": "viidim", "FBE♭♭": "viidim",
+  "C#EG": "iidim", "EGC#": "iidim", "GCE#": "iidim",
+
+  // Acordes de Sétima
+  "GBDF": "V7", "BDFG": "V7", "DFGB": "V7", "FGBD": "V7",
+  "CEGB": "Imaj7", "EGBC": "Imaj7", "GBCE": "Imaj7", "BCEG": "Imaj7",
+  "DFAC": "ii7", "FACD": "ii7", "ACDF": "ii7", "CDFA": "ii7",
+  "BDFA": "viiø7", "DFAB": "viiø7", "FABD": "viiø7", "ABDF": "viiø7"
 };
 
+// ============================================================================
+// MAPA ESTÁTICO DE CIFRAS PADRÃO (COM SUS2 E SUS4)
+// ============================================================================
 var CHORDS_STANDARD = {
-  "BDF": "B°", "DFB": "B°", "FBD": "B°",
-  "BE♭♭F": "Bm", "E♭♭FB": "Bm", "FBE♭♭": "Bm",
-  "A#F##D#": "D#", "E#G##B#": "E#", "G##B#E#": "E#", "B#E#G##": "E#",
+  // --- TRÍADES MAIORES ---
+  "CEG": "C", "EGC": "C", "GCE": "C",
+  "DF#A": "D", "F#AD": "D", "ADF#": "D",
+  "EGB#": "E", "GB#E": "E", "B#EG": "E",
+  "FAC": "F", "ACF": "F", "CFA": "F",
+  "F#A#C#": "F#", "A#C#F#": "F#", "C#F#A#": "F#",
+  "GBD": "G", "BDG": "G", "DGB": "G",
+  "AbCEb": "Ab", "CEbAb": "Ab", "EbAbC": "Ab",
+    "AC#E": "A", "C#EA": "A", "EAC#": "A",
+  "BbDF": "Bb", "DFBb": "Bb", "FBbD": "Bb",
+  "BD#F#": "B", "D#F#B": "B", "F#BD#": "B",
+
+  // --- ACORDES SUSPENDIDOS (SUS2) ---
+  "CDG": "Csus2", "DGC": "Csus2", "GCD": "Csus2",
+  "DEA": "Dsus2", "EAD": "Dsus2", "ADE": "Dsus2",
+  "EF#B": "Esus2", "F#BE": "Esus2", "BEF#": "Esus2",
+  "FGC": "Fsus2", "GCF": "Fsus2", "CFG": "Fsus2",
+  "GAD": "Gsus2", "ADG": "Gsus2", "DGA": "Gsus2",
+  "ABE": "Asus2", "BEA": "Asus2", "EAB": "Asus2",
+  "BC#F#": "Bsus2", "C#F#B": "Bsus2", "F#BC#": "Bsus2",
+
+  // --- ACORDES SUSPENDIDOS (SUS4) ---
+  "CFG": "Csus4", "FGC": "Csus4", "GCF": "Csus4",
+  "DGA": "Dsus4", "GAD": "Dsus4", "ADG": "Dsus4",
+  "EAB": "Esus4", "ABE": "Esus4", "BEA": "Esus4",
+  "FBbC": "Fsus4", "BbCF": "Fsus4", "CFBb": "Fsus4",
+  "FB♭C": "Fsus4", "B♭CF": "Fsus4", "CFB♭": "Fsus4",
+  "GCD": "Gsus4", "CDG": "Gsus4", "DGC": "Gsus4",
+  "ADE": "Asus4", "DEA": "Asus4", "EAD": "Asus4",
+  "BEF#": "Bsus4", "EF#B": "Bsus4", "F#BE": "Bsus4",
+
+  // --- TRÍADES ENARMÔNICAS E DUPLO-ACIDENTES ---
+  "A#F##D#": "D#", "F##D#A#": "D#", "D#A#F##": "D#",
+  "E#G##B#": "E#", "G##B#E#": "E#", "B#E#G##": "E#",
   "B#D##F##": "B#", "D##F##B#": "B#", "F##B#D##": "B#",
   "D♭F♭♭A♭": "D♭", "F♭♭A♭D♭": "D♭", "A♭D♭F♭♭": "D♭", "A♭F♭♭D♭": "D♭",
   "E♭G♭♭B♭": "E♭", "G♭♭B♭E♭": "E♭", "B♭E♭G♭♭": "E♭",
   "F♭A♭C♭": "F♭", "A♭C♭F♭": "F♭", "C♭F♭A♭": "F♭",
   "G♭B♭D♭": "G♭", "B♭D♭G♭": "G♭", "D♭G♭B♭": "G♭",
-  "A♭C♭E♭": "A♭", "C♭E♭A♭": "A♭", "E♭A♭C♭": "A♭",
-  "B♭D♭♭F♭♭": "B♭", "D♭♭F♭♭B♭": "B♭", "F♭♭B♭D♭♭": "B♭"
-};
+  "A♭C♭E♭": "A♭m", "C♭E♭A♭": "A♭m", "E♭A♭C♭": "A♭m",
+  "B♭D♭♭F♭♭": "B♭dim", "D♭♭F♭♭B♭": "B♭dim", "F♭♭B♭D♭♭": "B♭dim",
 
+  // --- TRÍADES MENORES ---
+  "CE♭G": "Cm", "E♭GC": "Cm", "GCE♭": "Cm", "GCEb": "Cm",
+  "DFA": "Dm", "FAD": "Dm", "ADF": "Dm",
+  "EGB": "Em", "GBE": "Em", "BEG": "Em",
+  "FAbC": "Fm", "AbCF": "Fm", "CFAb": "Fm",
+  "F#AC#": "F#m", "AC#F#": "F#m", "C#F#A": "F#m",
+  "GB♭D": "Gm", "B♭DG": "Gm", "DGB♭": "Gm", "GBbD": "Gm",
+  "ACE": "Am", "CEA": "Am", "EAC": "Am",
+  "BDF#": "Bm", "DF#B": "Bm", "F#BD": "Bm",
+  "BE♭♭F": "Bm", "E♭♭FB": "Bm", "FBE♭♭": "Bm",
+
+  // --- TRÍADES DIMINUTAS ---
+  "BDF": "Bdim", "DFB": "Bdim", "FBD": "Bdim",
+  "C#EG": "C#dim", "EGC#": "C#dim", "GCE#": "C#dim",
+  "D#F#A": "D#dim", "F#AD#": "D#dim", "AD#F#": "D#dim",
+  "E#G#B": "E#dim", "G#BE#": "E#dim", "BE#G#": "E#dim",
+
+  // --- ACORDES DE SÉTIMA (DOMINANTES E MAIORES) ---
+  "CEGB": "Cmaj7", "EGBC": "Cmaj7", "GBCE": "Cmaj7", "BCEG": "Cmaj7",
+  "CEGBb": "C7", "EGBbC": "C7", "GBbCE": "C7", "BbCEG": "C7",
+  "FACE": "Fmaj7", "ACEF": "Fmaj7", "CEFA": "Fmaj7", "EFAC": "Fmaj7",
+  "GBDF": "G7", "BDFG": "G7", "DFGB": "G7", "FGBD": "G7",
+   "GBDF#": "Gmaj7", "BDF#G": "Gmaj7", "DF#GB": "Gmaj7", "F#GBD": "Gmaj7",
+  "AC#EG": "A7", "C#EGA": "A7", "EGAC#": "A7", "GAC#E": "A7",
+  "AC#EG#": "Amaj7", "C#EG#A": "Amaj7", "EG#AC#": "Amaj7", "G#AC#E": "Amaj7",
+  "BD#F#A": "B7", "D#F#AB": "B7", "F#ABD#": "B7", "ABDF#": "B7"
+};
 // Dicionário precomputado e cache de busca
 var dictAcorde = {};
-var chordDictBuilt = false;
+var chordDictBuilt = true;
 
 // ============================================================================
 // CONSTRUÇÃO E PRÉ-PROCESSAMENTO DE ACORDES
 // ============================================================================
 
 function buildChordDictionary() {
-  if (chordDictBuilt) return;
-
+ 
   try {
     dictAcorde = {};
     for (var i = 0; i < 12; i++) {
@@ -126,7 +212,7 @@ function nameChord(notes, textElement, isSmall) {
 }
 
 function identifyChordSymbol(pitchNames, tipoCifra) {
-  var chordMap = (tipoCifra === 1) ? CHORDS_ROMAN : CHORDS_STANDARD;
+  var chordMap = (tipoCifra) ? CHORDS_ROMAN:CHORDS_STANDARD;
 
   // Remove notas duplicadas mantendo ordem
   var parts = pitchNames.split('-');
@@ -141,8 +227,8 @@ function identifyChordSymbol(pitchNames, tipoCifra) {
   var keyReversed = uniqueNotes.slice().reverse().join('');
 
   // Busca rápida no dicionário precomputado
-  if (dictAcorde[keyDirect]) return dictAcorde[keyDirect];
-  if (dictAcorde[keyReversed]) return dictAcorde[keyReversed];
+  // if (dictAcorde[keyDirect]) return dictAcorde[keyDirect];
+  // if (dictAcorde[keyReversed]) return dictAcorde[keyReversed];
 
   // Busca no mapeamento secundário estático
   if (chordMap[keyDirect]) return chordMap[keyDirect];
@@ -155,7 +241,7 @@ function identifyChordSymbol(pitchNames, tipoCifra) {
 // FUNÇÃO PRINCIPAL (RUNSHEET)
 // ============================================================================
 
-function runsheet(options, curScore, tipoCifra) {
+function runsheet(options, curScore,  tipoCifra ) {
   var cursor = null;
   
   try {
