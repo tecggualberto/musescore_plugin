@@ -3,7 +3,6 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
 // MuseScore 4.7 still exposes the QML plugin API as MuseScore 3.0.
-// The application version and plugin API version are not the same thing.
 import MuseScore 3.0
 
 import "ChordScanner.js" as ChordScanner
@@ -16,111 +15,252 @@ MuseScore {
     categoryCode: "composing-arranging-tools"
     thumbnailName: "ChordIdentifier.png"
 
-    width: 360
-    height: 190
+    width: 430
+    height: 380
 
     property bool overwriteExisting: false
-   property bool tipoCifra:true
+
+    // 0 = Símbolos
+    // 1 = Números Romanos
+    property int tipoCifra: 0
 
     onRun: {
         if (!curScore) {
-            messageBox.text = qsTr("Abra uma partitura antes de executar o plugin.")
+            messageBox.text = qsTr(
+                "Abra uma partitura antes de executar o plugin."
+            )
             messageBox.open()
             return
         }
     }
 
     function runIdentifier() {
-		if (!curScore) {
+        if (!curScore) {
             messageBox.text = qsTr("Nenhuma partitura aberta.")
             messageBox.open()
             return
         }
 
         try {
-          
-			curScore.startCmd();
+            curScore.startCmd()
+
             var options = {
-                overwriteExisting: overwriteExisting,
-             
+                overwriteExisting: overwriteExisting
             }
-			ChordScanner.tipoCifra = tipoCifra;
-            var result = ChordScanner.runsheet(options,curScore);
-			curScore.endCmd();	
-           
+
+            var result = ChordScanner.runsheet(
+                options,
+                curScore,
+                tipoCifra
+            )
+
+            curScore.endCmd()
 
             messageBox.text = result.message
             messageBox.open()
+
         } catch (error) {
+
             try {
-               curScore.endCmd(); 
+                curScore.endCmd()
             } catch (ignored) {
             }
 
-            messageBox.text = qsTr("Erro ao identificar acordes:\n") + error.message
+            messageBox.text =
+                qsTr("Erro ao identificar acordes:\n") +
+                error.message
+
             messageBox.open()
         }
     }
 
+    // ============================================================
+    // INTERFACE
+    // ============================================================
+
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 14
-        spacing: 10
+        anchors.margins: 20
+        spacing: 14
 
-        Label {
-            text: qsTr("Identificador de Acordes v2")
-            font.bold: true
+        // --------------------------------------------------------
+        // CABEÇALHO
+        // --------------------------------------------------------
+
+        ColumnLayout {
             Layout.fillWidth: true
+            spacing: 3
+
+            Label {
+                text: qsTr("Identificador de Acordes")
+                font.pixelSize: 20
+                font.bold: true
+                Layout.fillWidth: true
+            }
+
+            Label {
+                text: qsTr("Identifique os acordes da seleção ou da partitura.")
+                font.pixelSize: 12
+                opacity: 0.65
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+            }
         }
 
-        CheckBox {
-            text: qsTr("Substituir cifras existentes")
-            checked: overwriteExisting
-            onCheckedChanged: overwriteExisting = checked
+        // --------------------------------------------------------
+        // SEPARADOR
+        // --------------------------------------------------------
+
+        Rectangle {
             Layout.fillWidth: true
+            height: 1
+            opacity: 0.15
         }
 
-        CheckBox {
-           text: qsTr("Símbolos (C, G7) ou  Números Romanos (I, IV)")
-            checked: tipoCifra
-            onCheckedChanged: ChordScanner.tipoCifra = (tipoCifra)?0:1
+        // --------------------------------------------------------
+        // OPÇÕES
+        // --------------------------------------------------------
+
+        ColumnLayout {
             Layout.fillWidth: true
+            spacing: 10
+
+            Label {
+                text: qsTr("Opções")
+                font.bold: true
+                font.pixelSize: 13
+                Layout.fillWidth: true
+            }
+
+            // ----------------------------------------------------
+            // TIPO DE CIFRA
+            // ----------------------------------------------------
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 12
+
+                Label {
+                    text: qsTr("Tipo de cifra:")
+                    Layout.fillWidth: true
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                ComboBox {
+                    id: tipoCifraCombo
+
+                    Layout.preferredWidth: 190
+
+                    model: [
+                        qsTr("Símbolos (C, G7, Am...)"),
+                        qsTr("Números Romanos (I, IV, V...)")
+                    ]
+
+                    currentIndex: tipoCifra
+
+                    onCurrentIndexChanged: {
+                        tipoCifra = currentIndex
+                    }
+                }
+            }
+
+            // ----------------------------------------------------
+            // SUBSTITUIR CIFRAS
+            // ----------------------------------------------------
+
+            CheckBox {
+                id: overwriteCheck
+
+                text: qsTr("Substituir cifras existentes")
+                checked: overwriteExisting
+
+                onCheckedChanged: {
+                    overwriteExisting = checked
+                }
+
+                Layout.fillWidth: true
+            }
         }
-		
-     
 
-       
-		
+        Item {
+            Layout.fillHeight: true
+        }
 
+        // --------------------------------------------------------
+        // INFORMAÇÃO
+        // --------------------------------------------------------
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 42
+
+            radius: 6
+
+            opacity: 0.08
+
+            Label {
+                anchors.fill: parent
+                anchors.margins: 10
+
+                text: qsTr(
+                    "Dica: selecione um trecho para analisar apenas a seleção. "
+                    + "Sem seleção, toda a partitura será analisada."
+                )
+
+                font.pixelSize: 11
+                wrapMode: Text.WordWrap
+                verticalAlignment: Text.AlignVCenter
+                opacity: 0.8
+            }
+        }
+
+        // --------------------------------------------------------
+        // BOTÕES
+        // --------------------------------------------------------
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: 10
 
             Button {
                 text: qsTr("Identificar acordes")
+
                 Layout.fillWidth: true
-                onClicked: runIdentifier()
+                Layout.preferredHeight: 38
+
+                highlighted: true
+
+                onClicked: {
+                    runIdentifier()
+                }
             }
 
             Button {
                 text: qsTr("Cancelar")
-                onClicked: quit()
-            }
-        }
 
-        Label {
-            text: qsTr("Analisa a seleção; sem seleção, analisa a partitura.")
-            opacity: 0.7
-            wrapMode: Text.WordWrap
-            Layout.fillWidth: true
+                Layout.preferredWidth: 90
+                Layout.preferredHeight: 38
+
+                onClicked: {
+                    quit()
+                }
+            }
         }
     }
 
+    // ============================================================
+    // MENSAGEM
+    // ============================================================
+
     MessageDialog {
         id: messageBox
+
         title: qsTr("Identificador de Acordes")
+
         text: ""
-        onAccepted: quit()
+
+        onAccepted: {
+            quit()
+        }
     }
 }
